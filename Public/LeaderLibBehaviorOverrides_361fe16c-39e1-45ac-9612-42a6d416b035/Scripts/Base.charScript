@@ -11,6 +11,7 @@ INIT
 	EXTERN INT:%bool_CanChickenFlee=1
 	//New
 	FIXEDSTRING:%LeaderLib_CustomStatusAnimation = ""
+	FIXEDSTRING:%LeaderLib_CustomStillAnimation = ""
 	
 BEHAVIOUR
 
@@ -186,20 +187,35 @@ ACTIONS
 	IF "!c1"
 		CharacterHasStatus(__Me, SNEAKING)
 	THEN
-		IF "c1&c2"
-			CharacterGetStillAnimation(__Me,_Animation)
-			IsEqual(_Animation,"still")
+		IF "c1&!c2"
+			HasFlag(__Me, "LeaderLib_CustomStillAnimationEnabled")
+			IsEqual(%LeaderLib_CustomStillAnimation, "")
 		THEN
 			GetRandom(_SleepTime,2,3.5,6.8,9.3,11)
-			Sleep(_SleepTime)		
-			GetWeightedRandom(_Animation,"still",INT:0,"idle1",INT:10,"idle2",INT:10,"idle3",INT:10)
+			Sleep(_SleepTime)
 			IF "c1"
-				IsEqual(_Animation,%PrevIdleAnim)
+				IsEqual(%LeaderLib_CustomStillAnimation,%PrevIdleAnim)
 			THEN
 				Goto("Start")
 			ENDIF
-			Set(%PrevIdleAnim,_Animation)
-			CharacterPlayAnimation(_Animation)
+			Set(%PrevIdleAnim,%LeaderLib_CustomStillAnimation)
+			CharacterPlayAnimation(%LeaderLib_CustomStillAnimation)
+		ELSE
+			IF "c1&c2"
+				CharacterGetStillAnimation(__Me,_Animation)
+				IsEqual(_Animation,"still")
+			THEN
+				GetRandom(_SleepTime,2,3.5,6.8,9.3,11)
+				Sleep(_SleepTime)		
+				GetWeightedRandom(_Animation,"still",INT:0,"idle1",INT:10,"idle2",INT:10,"idle3",INT:10)
+				IF "c1"
+					IsEqual(_Animation,%PrevIdleAnim)
+				THEN
+					Goto("Start")
+				ENDIF
+				Set(%PrevIdleAnim,_Animation)
+				CharacterPlayAnimation(_Animation)
+			ENDIF
 		ENDIF
 	ENDIF
 INTERRUPT
