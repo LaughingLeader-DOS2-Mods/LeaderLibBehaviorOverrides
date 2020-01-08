@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<save>
+    <header version="2" />
+    <version major="3" minor="6" revision="6" build="0" />
+    <region id="MetaData">
+        <node id="root">
+            <attribute id="Module" value="361fe16c-39e1-45ac-9612-42a6d416b035" type="23" />
+            <attribute id="Name" value="LeaderLibBehaviorOverrides" type="23" />
+            <attribute id="Type" value="Add-on" type="23" />
+            <attribute id="UUID" value="e6fea24e-612d-4e43-9727-e620d310d841" type="23" />
+        </node>
+    </region>
+</save>
