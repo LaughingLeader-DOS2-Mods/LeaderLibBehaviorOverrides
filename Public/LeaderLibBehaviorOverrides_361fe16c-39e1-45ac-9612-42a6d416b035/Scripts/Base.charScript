@@ -33,6 +33,7 @@ USAGE WAITING
 CHECK "!c1"
 	IsEqual(%AttackOfOpportunity,null)
 ACTIONS
+	CharacterCharacterEvent(__Me, %AttackOfOpportunity, "LeaderLib_OnAttackOfOpportunity")
 	CharacterAttackWithoutMove(%AttackOfOpportunity)
 	Set(%AttackOfOpportunity,null)
 INTERRUPT 
