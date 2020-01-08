@@ -256,8 +256,9 @@ ACTIONS
 	Interrupt("FearCower")
 	CharacterStopAnimation()
 
+BEHAVIOUR
 //REGION NEW_BEHAVIOR
-REACTION LeaderLib_CustomStatusAnim, 99999
+REACTION LeaderLib_Base_CustomStatusAnim, 99999
 USAGE ALL
 CHECK "c1"
     HasFlag(__Me,"LeaderLib_CustomStatusAnimationEnabled")
@@ -267,4 +268,13 @@ IF "!c1"
 THEN
     CharacterPlayAnimation(%LeaderLib_CustomStatusAnimation,0,0)
 ENDIF
+
+EVENTS
+
+EVENT LeaderLib_Base_CustomStatusAnimCleared
+ON
+	OnCharacterFlagCleared("LeaderLib_CustomStatusAnimationEnabled", __Me)
+ACTIONS
+	Interrupt("LeaderLib_Base_CustomStatusAnim")
+	CharacterStopAnimation()
 //END_REGION
