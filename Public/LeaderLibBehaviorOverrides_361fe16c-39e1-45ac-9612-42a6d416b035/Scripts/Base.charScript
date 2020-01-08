@@ -256,46 +256,6 @@ ACTIONS
 	Interrupt("FearCower")
 	CharacterStopAnimation()
 
-/*
-EVENT ClearTauntedWhenTaunterDies
-VARS
-	CHARACTER:_EventChar=null
-	CHARACTER:_Taunter=null
-ON
-	OnDie(_EventChar,_,_,_)
-	OnCharacterStatusApplied(_EventChar,PLAY_DEAD)
-ACTIONS
-	IF "c1&c2&c3"
-		CharacterHasStatus(__Me,TAUNTED)
-		CharacterGetStatusSourceCharacter(__Me,TAUNTED,_Taunter)
-		IsEqual(_Taunter,_EventChar)
-	THEN
-		CharacterRemoveStatus(__Me,TAUNTED)
-	ENDIF
-	
-EVENT StatusFearChanged
-ON
-	OnCharacterStatusApplied(__Me,FEAR)
-ACTIONS
-	Set(%FearFlee,1)
-	
-EVENT StatusChickenChanged
-ON
-	OnCharacterStatusApplied(__Me,CHICKEN)
-	OnCharacterStatusApplied(__Me,ZOMBIE_CHICKEN)
-ACTIONS
-	Set(%FearFlee,1)
-	
-EVENT StatusChickenRemoved
-ON
-	OnCharacterStatusRemoved(__Me,CHICKEN)
-	OnCharacterStatusRemoved(__Me,CHICKEN)
-ACTIONS
-	Interrupt("ChickenCowerCombat")
-	Interrupt("ChickenCower")
-
-*/
-
 //REGION NEW_BEHAVIOR
 REACTION LeaderLib_CustomStatusAnim, 99999
 USAGE ALL
