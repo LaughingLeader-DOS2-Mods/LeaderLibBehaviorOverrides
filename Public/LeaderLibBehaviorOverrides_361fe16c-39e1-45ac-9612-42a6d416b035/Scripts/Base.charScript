@@ -9,6 +9,8 @@ INIT
 	FIXEDSTRING:%CrawInfest_Faction = ""
 	EXTERN INT:%FleeFromDangerousSurface=1
 	EXTERN INT:%bool_CanChickenFlee=1
+	//New
+	FIXEDSTRING:%LeaderLib_CustomStatusAnimation = ""
 	
 BEHAVIOUR
 
@@ -293,3 +295,16 @@ ACTIONS
 	Interrupt("ChickenCower")
 
 */
+
+//REGION NEW_BEHAVIOR
+REACTION LeaderLib_CustomStatusAnim, 99999
+USAGE ALL
+CHECK "c1"
+    HasFlag(__Me,"LeaderLib_CustomStatusAnimationEnabled")
+ACTIONS
+IF "!c1"
+	IsEqual(%LeaderLib_CustomStatusAnimation, "")
+THEN
+    CharacterPlayAnimation(%LeaderLib_CustomStatusAnimation,0,0)
+ENDIF
+//END_REGION
