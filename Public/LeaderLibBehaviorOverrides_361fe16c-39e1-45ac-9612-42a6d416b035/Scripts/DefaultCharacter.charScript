@@ -226,14 +226,32 @@ ACTIONS
 EVENT ReceivedDamage
 VARS
 	CHARACTER:_Source
+	DAMAGE:_DamageType
+	FLOAT:_DamagePercentage
+	ITEM:_ItemSource
 ON
-	OnDamage(_, _, _Source, _)
+	OnDamage(_DamageType, _DamagePercentage, _Source, _ItemSource)
 ACTIONS
+IF "!c1"
+	IsEqual(__Me, _Source)
+THEN
+	Add(%TookDamage, 1)
+ENDIF
+IF "c1"
+	HasGlobalFlag("LeaderLib_Behavior_OnDamageEventsEnabled")
+THEN
 	IF "!c1"
-		IsEqual(__Me, _Source)
+		IsEqual(_Source, null)
 	THEN
-		Add(%TookDamage, 1)
+		CharacterCharacterEvent(__Me, _Source, "LeaderLib_OnDamage")
 	ENDIF
+	IF "!c!"
+		IsEqual(_ItemSource, null)
+	THEN
+		CharacterItemEvent(__Me, _ItemSource, "LeaderLib_OnDamage")
+	ENDIF
+ENDIF
+	CharacterEvent(__Me, "LeaderLib_OnDamage")
 
 EVENT FallbackDialogDone
 ON
