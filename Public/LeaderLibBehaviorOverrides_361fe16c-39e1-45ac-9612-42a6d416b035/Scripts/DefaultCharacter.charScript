@@ -436,6 +436,7 @@ CHECK "c1"
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	DebugText(__Me,"[GOING TO ATTACK]")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchAttackCommand")
 	CharacterAiMove(_EndPosition, _TargetCharacter, _TargetItem)
 	IF "!c1"
 		IsEqual(_TargetPos,null)
@@ -469,6 +470,7 @@ CHECK "c1"
 	CharacterAiFetchConsumeCommand(_Item)
 ACTIONS
 	CallFunction("StopEvaluateScore")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchConsumeCommand")
 	DebugText(__Me,"[GOING TO CONSUME [1]",_Item)
 	IF "c1"
 		CharacterCanUseItemInInventory(__Me, _Item, 1)
@@ -510,6 +512,7 @@ CHECK "c1"
 	CharacterAiFetchSkillCommand(_Skill,_SkillItem,_EndPosition,_TargetPos1,_TargetCharacter1,_TargetItem1,_TargetPos2,_TargetCharacter2,_TargetItem2)
 ACTIONS
 	CallFunction("StopEvaluateScore")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchSkillCommand")
 	DebugText(__Me,"[GOING TO CAST [1] from [2]",_Skill,_SkillItem)
 	CharacterAiMove(_EndPosition, _TargetCharacter1, _TargetItem1)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -620,6 +623,7 @@ CHECK "c1"
 	CharacterAiFetchMoveSkillCommand(_Skill,_SkillItem,_TargetPos)
 ACTIONS
 	CallFunction("StopEvaluateScore")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchMoveSkillCommand")
 	DebugText(__Me,"[GOING TO GET IN POSITION: [1] from [2]",_Skill,_SkillItem)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Check if we can still cast the skill
@@ -656,12 +660,13 @@ ACTIONS
 
 REACTION Combat_MoveOutOfSurfaces, 5
 USAGE COMBAT
-CHECK "(c1|c2)&!c3&!c4&c5"
+CHECK "(c1|c2)&!c3&!c4&c5&!c6"
 	IsInSurface(__Me,SurfaceOil)
 	IsInDangerousSurface(__Me)		
 	CharacterIsFloating(__Me)
 	CharacterHasStatus(__Me,ETHEREAL_SOLES)
 	CharacterCanMove(__Me)
+	HasFlag(__Me, "LeaderLib_Behavior_MoveOutOfSurfacesDisabled")
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	IF "c1"
