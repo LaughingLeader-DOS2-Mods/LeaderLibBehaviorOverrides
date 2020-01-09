@@ -1,0 +1,85 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+//DB_LeaderLib_Behavior_DisablingStatusTypes("KNOCKED_DOWN");
+//DB_LeaderLib_Behavior_DisablingStatusTypes("INCAPACITATED");
+//DB_LeaderLib_Behavior_DisablingStatusTypes("DEACTIVATED");
+KBSECTION
+
+/*
+PROC
+LeaderLib_Behavior_Statuses_OnStatusApplied((CHARACTERGUID)_Character, (STRING)_Status, (STRING)_StatusType, (GUIDSTRING)_Source)
+THEN
+DB_NOOP(1);
+*/
+
+PROC
+LeaderLib_Behavior_Statuses_OnStatusApplied((CHARACTERGUID)_Character, (STRING)_Status, "KNOCKED_DOWN", (GUIDSTRING)_Source)
+THEN
+ObjectSetFlag(_Character, "LeaderLib_Behavior_IsDisabled", 0);
+DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status);
+
+PROC
+LeaderLib_Behavior_Statuses_OnStatusApplied((CHARACTERGUID)_Character, (STRING)_Status, "INCAPACITATED", (GUIDSTRING)_Source)
+THEN
+ObjectSetFlag(_Character, "LeaderLib_Behavior_IsDisabled", 0);
+DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status);
+
+PROC
+LeaderLib_Behavior_Statuses_OnStatusApplied((CHARACTERGUID)_Character, (STRING)_Status, "DEACTIVATED", (GUIDSTRING)_Source)
+THEN
+ObjectSetFlag(_Character, "LeaderLib_Behavior_IsDisabled", 0);
+DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status);
+
+PROC
+LeaderLib_Behavior_Statuses_OnStatusApplied((CHARACTERGUID)_Character, (STRING)_Status, "INVISIBLE", (GUIDSTRING)_Source)
+THEN
+ObjectSetFlag(_Character, "LeaderLib_Behavior_IsInvisible", 0);
+DB_LeaderLib_Behavior_Statuses_Temp_Invisibility(_Character, _Status);
+
+PROC
+LeaderLib_Behavior_Statuses_OnInvisibilityRemoved((CHARACTERGUID)_Character)
+AND
+NOT DB_LeaderLib_Behavior_Statuses_Temp_Invisibility(_Character, _)
+THEN
+ObjectClearFlag(_Character, "LeaderLib_Behavior_IsInvisible", 0);
+
+PROC
+LeaderLib_Behavior_Statuses_OnDisableRemoved((CHARACTERGUID)_Character)
+AND
+NOT DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _)
+THEN
+ObjectClearFlag(_Character, "LeaderLib_Behavior_IsDisabled", 0);
+
+PROC
+LeaderLib_Behavior_Statuses_ClearData()
+AND
+DB_LeaderLib_Behavior_Statuses_Temp_Invisibility(_Character, _Status)
+AND
+ObjectExists(_Character, 1)
+AND
+ObjectGetFlag(_Character, "LeaderLib_Behavior_IsInvisible", 1)
+THEN
+ObjectClearFlag(_Character, "LeaderLib_Behavior_IsInvisible", 0);
+
+PROC
+LeaderLib_Behavior_Statuses_ClearData()
+AND
+DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status)
+AND
+ObjectExists(_Character, 1)
+AND
+ObjectGetFlag(_Character, "LeaderLib_Behavior_IsDisabled", 1)
+THEN
+ObjectClearFlag(_Character, "LeaderLib_Behavior_IsDisabled", 0);
+
+PROC
+LeaderLib_Behavior_Statuses_ClearData()
+THEN
+//Clear data
+SysClear("DB_LeaderLib_Behavior_Statuses_Temp_Invisibility", 2);
+SysClear("DB_LeaderLib_Behavior_Statuses_Temp_Disable", 2);
+EXITSECTION
+
+ENDEXITSECTION
+ParentTargetEdge "LeaderLib_Behavior"

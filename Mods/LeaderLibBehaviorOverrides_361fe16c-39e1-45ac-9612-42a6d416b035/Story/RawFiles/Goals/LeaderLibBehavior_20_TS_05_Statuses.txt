@@ -1,0 +1,32 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+
+KBSECTION
+IF
+CharacterStatusApplied(_Character, _Status, _Source)
+AND
+GetStatusType(_Status, _StatusType)
+THEN
+LeaderLib_Behavior_Statuses_OnStatusApplied(_Character, _Status, _StatusType, _Source);
+
+IF
+CharacterStatusRemoved(_Character, _Status, _)
+AND
+DB_LeaderLib_Behavior_Statuses_Temp_Invisibility(_Character, _Status)
+THEN
+NOT DB_LeaderLib_Behavior_Statuses_Temp_Invisibility(_Character, _Status);
+LeaderLib_Behavior_Statuses_OnInvisibilityRemoved(_Character);
+
+IF
+CharacterStatusRemoved(_Character, _Status, _)
+AND
+DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status)
+THEN
+NOT DB_LeaderLib_Behavior_Statuses_Temp_Disable(_Character, _Status);
+LeaderLib_Behavior_Statuses_OnDisableRemoved(_Character);
+
+EXITSECTION
+LeaderLib_Behavior_Statuses_ClearData();
+ENDEXITSECTION
+ParentTargetEdge "LeaderLibBehavior_20__ToggleScripts"

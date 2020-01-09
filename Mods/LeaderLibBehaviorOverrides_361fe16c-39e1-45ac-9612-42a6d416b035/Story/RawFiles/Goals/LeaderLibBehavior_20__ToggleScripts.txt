@@ -1,0 +1,18 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+SysActivateGoal("LeaderLibBehavior_20_TS_05_Statuses");
+KBSECTION
+IF
+GlobalFlagSet("LeaderLib_Behavior_StatusTypeFlags_Disabled")
+THEN
+SysCompleteGoal("LeaderLibBehavior_20_TS_05_Statuses");
+
+IF
+GlobalFlagCleared("LeaderLib_Behavior_StatusTypeFlags_Disabled")
+THEN
+SysActivateGoal("LeaderLibBehavior_20_TS_05_Statuses");
+EXITSECTION
+
+ENDEXITSECTION
+ParentTargetEdge "LeaderLib_Behavior"

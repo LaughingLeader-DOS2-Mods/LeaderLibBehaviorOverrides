@@ -1,0 +1,28 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+LLBEHAVIOR_Start_Internal_CompleteIfStarted(); // Existing saves
+KBSECTION
+IF
+GameEventSet("GAMEEVENT_GameStarted")
+THEN
+GoalCompleted;
+
+PROC
+LLBEHAVIOR_Start_Internal_CompleteIfStarted()
+AND
+DB_StoryStarted(_)
+THEN
+DebugBreak("[LeaderLib_BehaviorOverrides] Existing save detected.");
+GoalCompleted;
+
+//If something truly funky happened
+IF
+SavegameLoaded(_,_,_,_)
+AND
+DB_StoryStarted(_)
+THEN
+GoalCompleted;
+EXITSECTION
+ENDEXITSECTION
+ParentTargetEdge "__Start"
