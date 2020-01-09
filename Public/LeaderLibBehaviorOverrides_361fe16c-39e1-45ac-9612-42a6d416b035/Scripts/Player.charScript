@@ -5,7 +5,7 @@ FIXEDSTRING:%ForceAnim = ""
 TRIGGER:%CreationPoint = null
 FIXEDSTRING:%CCIntroductionAnim = ""
 FIXEDSTRING:%CCIdleAnim = "still"
-
+FIXEDSTRING:%LeaderLib_CustomCCAnimation = "still"
 
 USING SHARED Base
 
@@ -18,11 +18,11 @@ ON
 	OnCharacterCreationStarted(__Me, _CreationTrigger)
 ACTIONS
 	CharacterSetAnimationSetOverride(__Me,"CharCreation")
-	IF "c1&c2"
-		CharacterGetCreationClass(__Me,_Class)
-		IsEqual(_Class,"Alchemist")
+	IF "c1&!c2"
+		HasFlag(__Me, "LeaderLib_CustomCCAnimationEnabled")
+		IsEqual(%LeaderLib_CustomCCAnimation, "")
 	THEN
-		Set(%CCIdleAnim,"CC_Still_Gun")
+		Set(%LeaderLib_CustomCCAnimation,"still")
 	ELSE
 		Set(%CCIdleAnim,"still")
 	ENDIF
@@ -65,10 +65,11 @@ VARS
 ON 
 	OnCharacterClassChanged(__Me, _Class)
 ACTIONS
-	IF "c1"
-		IsEqual(_Class,"Alchemist") 
+	IF "c1&!c2"
+		HasFlag(__Me, "LeaderLib_CustomCCAnimationEnabled")
+		IsEqual(%LeaderLib_CustomCCAnimation, "")
 	THEN
-		Set(%CCIdleAnim,"CC_Still_Gun")
+		Set(%LeaderLib_CustomCCAnimation,"still")
 	ELSE
 		Set(%CCIdleAnim,"still")
 	ENDIF
