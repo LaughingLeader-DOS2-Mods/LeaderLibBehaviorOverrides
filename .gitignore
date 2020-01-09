@@ -1,3 +1,5 @@
+PublishReleases.py
+
 # SourceControlGenerator #
 ##########################
 SourceControlGenerator.json
@@ -116,3 +118,4 @@ ehthumbs.db
 Thumbs.db
 *.lnk
 
+*.pak
