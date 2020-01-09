@@ -308,8 +308,9 @@ IF "!c1"
 THEN
 	Add(%TookDamage, 1)
 ENDIF
-IF "c1"
+IF "c1|c2"
 	HasGlobalFlag("LeaderLib_Behavior_OnDamageEventsEnabled")
+	HasFlag(_Char, "LeaderLib_Behavior_OnDamageEventsEnabled")
 THEN
 	IF "!c1"
 		IsEqual(_Source, null)
@@ -444,7 +445,7 @@ ACTIONS
 		CharacterHasStatus(__Me, INVISIBLE)
 		HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 	THEN
-		CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
+		CallFunction("LeaderLib_Behavior_PlaySkipTurnEffect")
 	ENDIF
 	Sleep(0.5)
 	EndTurn(__Me)
@@ -463,10 +464,12 @@ USAGE COMBAT
 VARS
 	FLOAT3:_TargetPosition
 	FLOAT3:_LookAtPosition
+	STRING:_FallbackADDialog
 CHECK "c1"
 	CharacterAiFetchFallbackCommand(_TargetPosition,_LookAtPosition)
 ACTIONS
 	CallFunction("StopEvaluateScore")
+	Set(_FallbackADDialog, "CMB_AD_CombatFallback")
 	DebugText(__Me,"[GOING TO MOVE TO BETTER POSITION]")
 	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchFallbackCommand")
 	CharacterAiMove(_TargetPosition, null, null)
@@ -480,7 +483,7 @@ ACTIONS
 		IsInArena(__Me)
 	THEN
 		StartTimer("FallbackDialogTimer",2.0,0)
-		DialogStart(%FallbackInstanceId,"CMB_AD_CombatFallback",__Me)
+		DialogStart(%FallbackInstanceId,_FallbackADDialog,__Me)
 	ELSE
 		Sleep(1.0)
 		EndTurn(__Me)
@@ -561,7 +564,7 @@ ACTIONS
 			CharacterHasStatus(__Me, INVISIBLE)
 			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
-			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
+			CallFunction("LeaderLib_Behavior_PlaySkipTurnEffect")
 		ENDIF
 		Sleep(0.5)
 		EndTurn(__Me)
@@ -617,7 +620,7 @@ ACTIONS
 			CharacterHasStatus(__Me, INVISIBLE)
 			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
-			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
+			CallFunction("LeaderLib_Behavior_PlaySkipTurnEffect")
 		ENDIF
 		Sleep(0.5)
 		EndTurn(__Me)
@@ -714,7 +717,7 @@ ACTIONS
 			CharacterHasStatus(__Me, INVISIBLE)
 			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
-			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
+			CallFunction("LeaderLib_Behavior_PlaySkipTurnEffect")
 		ENDIF
 		Sleep(0.5)
 		EndTurn(__Me)
@@ -818,3 +821,23 @@ ON
 	OnCharacterFlagCleared("LeaderLib_Behavior_MoveOutOfSurfacesDisabled", __Me)
 ACTIONS
 	SetPriority("Combat_MoveOutOfSurfaces", 5)
+
+EVENT LeaderLib_SkipTurnEffect
+VARS
+	STRING:_Effect
+	FIXEDSTRING:_Bone
+ON
+	OnCharacterEvent(__Me, "LeaderLib_Behavior_PlaySkipTurnEffect")
+	OnFunction("LeaderLib_Behavior_PlaySkipTurnEffect")
+ACTIONS
+	IF "c1|c2"
+		HasGlobalFlag("LeaderLib_Behavior_SkipTurnOverrideEnabled")
+		HasFlag(__Me, "LeaderLib_Behavior_SkipTurnOverrideEnabled")
+	THEN
+		Set(_Effect, "RS3_FX_UI_Icon_SkipTurn_01")
+		Set(_Bone, "Dummy_OverheadFX")
+		CharacterEvent(__Me, "LeaderLib_GetSkipTurnEffect")
+		CharacterPlayEffect(__Me, _Effect, _Bone)
+	ELSE
+		CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
+	ENDIF
