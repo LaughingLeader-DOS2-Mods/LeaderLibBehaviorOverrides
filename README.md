@@ -171,3 +171,13 @@ Called when CharacterAiFetchMoveSkillCommand fires.
 | LeaderLib_GetSkipTurnEffect | Character | Called if the LeaderLib_Behavior_SkipTurnOverrideEnabled flag is set globally or on a character. Set LeaderLib_SkipTurnEffect.Effect and LeaderLib_SkipTurnEffect.Bone | StoryEvent(_Char_, "LeaderLib_GetSkipTurnEffect") |
 | LeaderLib_GetRandomArchetype | Character | Called when a an AI is about to set a random archetype. Set the Archetype FIXEDSTRING to override the result. | StoryEvent(_Npc, "LeaderLib_GetRandomArchetype") |
 | LeaderLib_SetArchetype | Character | Call to make a character set their Archetype to their Archetype var. | SetStoryEvent(_Npc, "LeaderLib_SetArchetype"); |
+
+## Player.charScript
+
+Used by every player character.
+
+### New Global Vars
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| LeaderLib_CustomCCAnimation | SKILL | An animation to play in CC if LeaderLib_CustomCCAnimationEnabled is set. |
