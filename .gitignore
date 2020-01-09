@@ -37,20 +37,20 @@ story.debugInfo
 
 # Assets             #
 ######################
-*.gr2
-*.dae
-*.swf
-*.bullet
-*.dds
-*.tga
-*.png
-*.ttf
-*.lsb
-*.lsf
-*.lsfx
-*.lsefx
-#*.lsx
-*.lsmg
+# *.gr2
+# *.dae
+# *.swf
+# *.bullet
+# *.dds
+# *.tga
+# *.png
+# *.ttf
+# *.lsb
+# *.lsf
+# *.lsfx
+# *.lsefx
+# #*.lsx
+# *.lsmg
 
 # Logs               #
 ######################
