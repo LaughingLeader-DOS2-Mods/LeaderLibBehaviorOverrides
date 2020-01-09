@@ -18,7 +18,6 @@ INIT
 	INT:%OnInitOnlyOnce = 0
 	INT:%FallbackInstanceId = null
 	INT:%VisibleCharactersInCombat = 0
-	SKILL:%LeaderLib_Behavior_ForcedSkill = null
 	/*
 		New Tags:
 		"LeaderLib_Behavior_SeeThroughInvisiblity"	Ignores invisibility for maximum metagaming
@@ -51,38 +50,14 @@ EVENT InitChar
 ON
 	OnInit()
 ACTIONS
-	IF "!c1"
+	IF "!c1&!c2"
 		IsEqual(%Archetype,null)
+		HasGlobalFlag("LeaderLib_Behavior_RandomArchetypesEnabled")
 	THEN
 		CharacterSetArchetype(__Me,%Archetype)
 		Set(%Archetype,null)
-	ELIF "c1&!c2"
-		HasGlobalFlag("LeaderLib_Behavior_RandomArchetypes_Enabled")
-		CharacterIsPlayer(__Me)
-	THEN
-		IF "c1|c2|c3|c4|c5"
-			CharacterHasWeaponType(__Me, Axe, 1)
-			CharacterHasWeaponType(__Me, Club, 1)
-			CharacterHasWeaponType(__Me, Knife, 1)
-			CharacterHasWeaponType(__Me, Spear, 1)
-			CharacterHasWeaponType(__Me, Sword, 1)
-		THEN
-			GetRandom(%Archetype, berserker, bazooka, bomber, healer, rogue, warrior)
-		ELIF "c1|c2"
-			CharacterHasWeaponType(__Me, Wand, 1)
-			CharacterHasWeaponType(__Me, Staff, 1)
-		THEN
-			GetRandom(%Archetype, berserker, bazooka, bomber, healer, mage)
-		ELIF "c1|c2|c3"
-			CharacterHasWeaponType(__Me, Bow, 1)
-			CharacterHasWeaponType(__Me, Crossbow, 1)
-			CharacterHasWeaponType(__Me, Arrow, 1)
-		THEN
-			GetRandom(%Archetype, berserker, bazooka, bomber, healer, ranger, ranged)
-		ELSE
-			GetRandom(%Archetype, base, bazooka, berserker, bomber, healer, mage, melee, ranged, ranger, rogue, warrior)
-		ENDIF
-			CharacterSetArchetype(__Me,%Archetype)
+	ELSE
+		CallFunction("LeaderLib_DefaultCharacter_GetRandomArchetype")
 	ENDIF
 
 	IF "c1"
@@ -100,6 +75,47 @@ ACTIONS
 		ENDIF
 		Set(%OnInitOnlyOnce,1)
 	ENDIF
+
+EVENT LeaderLib_DefaultCharacter_SetRandomArchetype
+ON
+	OnFunction("LeaderLib_DefaultCharacter_GetRandomArchetype")
+	OnGlobalFlagSet("LeaderLib_Behavior_RandomArchetypesEnabled")
+ACTIONS
+IF "!c1"
+	CharacterIsPlayer(__Me)
+THEN
+	IF "c1|c2|c3|c4|c5"
+		CharacterHasWeaponType(__Me, Axe, 1)
+		CharacterHasWeaponType(__Me, Club, 1)
+		CharacterHasWeaponType(__Me, Knife, 1)
+		CharacterHasWeaponType(__Me, Spear, 1)
+		CharacterHasWeaponType(__Me, Sword, 1)
+	THEN
+		GetRandom(%Archetype, berserker, bazooka, bomber, healer, rogue, warrior)
+	ELIF "c1|c2"
+		CharacterHasWeaponType(__Me, Wand, 1)
+		CharacterHasWeaponType(__Me, Staff, 1)
+	THEN
+		GetRandom(%Archetype, berserker, bazooka, bomber, healer, mage)
+	ELIF "c1|c2|c3"
+		CharacterHasWeaponType(__Me, Bow, 1)
+		CharacterHasWeaponType(__Me, Crossbow, 1)
+		CharacterHasWeaponType(__Me, Arrow, 1)
+	THEN
+		GetRandom(%Archetype, berserker, bazooka, bomber, healer, ranger, ranged)
+	ELSE
+		GetRandom(%Archetype, base, bazooka, berserker, bomber, healer, mage, melee, ranged, ranger, rogue, warrior)
+	ENDIF
+	CharacterEvent(__Me, "LeaderLib_GetRandomArchetype")
+	CallFunction("LeaderLib_DefaultCharacter_SetArchetype")
+ENDIF
+
+EVENT LeaderLib_DefaultCharacter_SetArchetype
+ON
+	OnCharacterEvent(__Me, "LeaderLib_SetArchetype")
+	OnFunction("LeaderLib_DefaultCharacter_SetArchetype")
+ACTIONS
+	CharacterSetArchetype(__Me,%Archetype)
 
 EVENT StartCombatFetchPos
 ON
@@ -574,13 +590,6 @@ CHECK "c1"
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchSkillCommand")
-	IF "!c1"
-		IsEqual(%LeaderLib_Behavior_ForcedSkill, null)
-	THEN
-		Set(_Skill, %LeaderLib_Behavior_ForcedSkill)
-		Set(%LeaderLib_Behavior_ForcedSkill, null)
-	ENDIF
-	
 	DebugText(__Me,"[GOING TO CAST [1] from [2]",_Skill,_SkillItem)
 	CharacterAiMove(_EndPosition, _TargetCharacter1, _TargetItem1)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
