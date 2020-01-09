@@ -18,6 +18,16 @@ INIT
 	INT:%OnInitOnlyOnce = 0
 	INT:%FallbackInstanceId = null
 	INT:%VisibleCharactersInCombat = 0
+	SKILL:%LeaderLib_Behavior_ForcedSkill = null
+	/*
+		New Tags:
+		"LeaderLib_Behavior_SeeThroughInvisiblity"	Ignores invisibility for maximum metagaming
+		
+		New condition flags:
+		"LeaderLib_Behavior_IsInvisible"	Used as a way to make all INVISIBLE type statuses considered
+		"LeaderLib_Behavior_IsDisabled"	For KNOCKED_DOWN, STUNNED, or other disabling status types
+		"LeaderLib_Behavior_IsFloating"	ETHERAL_SOLES workaround, also makes the AI not avoid surfaces
+	*/
 EVENTS
 
 EVENT CrimeSensibleActionFallback
@@ -46,6 +56,33 @@ ACTIONS
 	THEN
 		CharacterSetArchetype(__Me,%Archetype)
 		Set(%Archetype,null)
+	ELIF "c1&!c2"
+		HasGlobalFlag("LeaderLib_Behavior_RandomArchetypes_Enabled")
+		CharacterIsPlayer(__Me)
+	THEN
+		IF "c1|c2|c3|c4|c5"
+			CharacterHasWeaponType(__Me, Axe, 1)
+			CharacterHasWeaponType(__Me, Club, 1)
+			CharacterHasWeaponType(__Me, Knife, 1)
+			CharacterHasWeaponType(__Me, Spear, 1)
+			CharacterHasWeaponType(__Me, Sword, 1)
+		THEN
+			GetRandom(%Archetype, berserker, bazooka, bomber, healer, rogue, warrior)
+		ELIF "c1|c2"
+			CharacterHasWeaponType(__Me, Wand, 1)
+			CharacterHasWeaponType(__Me, Staff, 1)
+		THEN
+			GetRandom(%Archetype, berserker, bazooka, bomber, healer, mage)
+		ELIF "c1|c2|c3"
+			CharacterHasWeaponType(__Me, Bow, 1)
+			CharacterHasWeaponType(__Me, Crossbow, 1)
+			CharacterHasWeaponType(__Me, Arrow, 1)
+		THEN
+			GetRandom(%Archetype, berserker, bazooka, bomber, healer, ranger, ranged)
+		ELSE
+			GetRandom(%Archetype, base, bazooka, berserker, bomber, healer, mage, melee, ranged, ranger, rogue, warrior)
+		ENDIF
+			CharacterSetArchetype(__Me,%Archetype)
 	ENDIF
 
 	IF "c1"
@@ -188,8 +225,9 @@ EVENT StartedInvisibleTurn
 ON
 	OnTurn(__Me, _)
 ACTIONS
-	IF "c1"
+	IF "c1|c2"
 		CharacterHasStatus(__Me, INVISIBLE)
+		HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 	THEN
 		Set(%InvisibleDialog, 0)
 		IterateParty("GLO_InvisibleTurnStart", Lowest, Distance)
@@ -197,27 +235,44 @@ ACTIONS
 
 EVENT IteratePlayersWhileInvisible
 VARS
-CHARACTER:_Player
+	CHARACTER:_Player
+	INT:_TargetIsInvisible
+	INT:_TargetIsDisabled
 ON
 	OnIterateCharacter(_Player, "GLO_InvisibleTurnStart")
 ACTIONS
-	IF "c1&c2&!c3&!c4&c5&!c6&!c7&c8&!c9&!c10&!c11&!c12&!c13&!c14&!c15&!c16"
+	IF "!c1&(c2|c3|c4)"
+		IsTagged(__Me, "LeaderLib_Behavior_SeeThroughInvisiblity")
+		HasFlag(_Player, "LeaderLib_Behavior_IsInvisible")
+		CharacterHasStatus(_Player, INVISIBLE)
+		CharacterHasStatus(_Player, SNEAKING)
+	THEN
+		Set(_TargetIsInvisible, 1)
+	ENDIF
+	
+	IF "c1|c2|c3|c4|c5|c6"
+		HasFlag(_Player, "LeaderLib_Behavior_IsDisabled")
+		CharacterHasStatus(_Player, KNOCKED_DOWN) //c3
+		CharacterHasStatus(_Player, FROZEN) //c4
+		CharacterHasStatus(_Player, PETRIFIED) //c5
+		CharacterHasStatus(_Player, STUNNED) //c6
+		CharacterHasStatus(_Player, SLEEPING) //c7
+	THEN
+		Set(_TargetIsDisabled, 1)
+	ENDIF
+	
+	IF "c1&c2&!c3&!c4&c5&!c6&c7&!c8&!c9&!c10&!c11"
 		IsInCombatWith(_Player, __Me)			//c1
 		CharacterIsEnemy(_Player, __Me)			//c2
 		CharacterIsDead(_Player,0)				//!c3
 		IsInDialog(_Player)						//!c4
 		IsEqual(%InvisibleDialog, 0)			//c5
-		CharacterHasStatus(_Player, INVISIBLE)	//!c6
-		CharacterHasStatus(_Player, SNEAKING)	//!c7
-		CharacterIsPlayer(_Player)				//c8
-		CharacterIsSummon(_Player)				//!c9
-		CharacterIsPolymorphInteractionDisabled(_Player) //!c10
-		CharacterIsPartyFollower(_Player)		//!c11
-		CharacterHasStatus(_Player, KNOCKED_DOWN) //!c12
-		CharacterHasStatus(_Player, FROZEN) //!c13
-		CharacterHasStatus(_Player, PETRIFIED) //!c14
-		CharacterHasStatus(_Player, STUNNED) //!c15
-		CharacterHasStatus(_Player, SLEEPING) //!c16
+		IsEqual(_TargetIsInvisible, 1)			//!c6
+		CharacterIsPlayer(_Player)				//c7
+		CharacterIsSummon(_Player)				//!c8
+		CharacterIsPolymorphInteractionDisabled(_Player) //!c9
+		CharacterIsPartyFollower(_Player)		//!c10
+		IsEqual(_TargetIsDisabled, 1)			//!c11
 	THEN
 		Set(%InvisibleDialog, 1)
 		DialogStart(_, "CMB_AD_Comment_InvisibleEnemyTurn", _Player)
@@ -268,10 +323,11 @@ VARS
 ON
 	OnIterateCharacter(_Char, "FindVisibleCharactersInCombat")
 ACTIONS
-	IF "!c1&c2&!c3"
+	IF "!c1&c2&!c3&!c4"
 		IsEqual(_Char, __Me)
 		CharacterIsEnemy(__Me, _Char)
 		CharacterHasStatus(_Char, INVISIBLE)
+		HasFlag(_Char, "LeaderLib_Behavior_IsInvisible")
 	THEN
 		Add(%VisibleCharactersInCombat, 1)
 	ENDIF
@@ -366,9 +422,11 @@ CHECK "c1"
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	DebugText(__Me,"[CANNOT DO WHAT I WOULD WANT TO DO, WILL SAVE AP FOR NEXT TURN]")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchSaveActionPointsCommand")
 	CharacterAiMove(_TargetPosition, null, null, _EndPosition)
-	IF "!c1"
+	IF "!c1&!c2"
 		CharacterHasStatus(__Me, INVISIBLE)
+		HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 	THEN
 		CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
 	ENDIF
@@ -394,11 +452,13 @@ CHECK "c1"
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	DebugText(__Me,"[GOING TO MOVE TO BETTER POSITION]")
+	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchFallbackCommand")
 	CharacterAiMove(_TargetPosition, null, null)
 	CharacterLookAt(_LookAtPosition)
-	IF "c1&!c2&c3&!c4&!c5"
+	IF "c1&!c2&!c3&c4&!c5&!c6"
 		IsVisible(__Me)
-		CharacterHasStatus(__Me,"INVISIBLE")
+		CharacterHasStatus(__Me, INVISIBLE)
+		HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		IsEqual(%bool_CombatFallbackAD,1)
 		IsInGameMasterMode()
 		IsInArena(__Me)
@@ -481,8 +541,9 @@ ACTIONS
 		CharacterCanUseItemInInventory(__Me, _Item, 0)
 	THEN
 		Sleep(0.5)
-		IF "!c1"
+		IF "!c1&!c2"
 			CharacterHasStatus(__Me, INVISIBLE)
+			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
 			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
 		ENDIF
@@ -513,6 +574,13 @@ CHECK "c1"
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	CharacterEvent(__Me, "LeaderLib_AI_CharacterAiFetchSkillCommand")
+	IF "!c1"
+		IsEqual(%LeaderLib_Behavior_ForcedSkill, null)
+	THEN
+		Set(_Skill, %LeaderLib_Behavior_ForcedSkill)
+		Set(%LeaderLib_Behavior_ForcedSkill, null)
+	ENDIF
+	
 	DebugText(__Me,"[GOING TO CAST [1] from [2]",_Skill,_SkillItem)
 	CharacterAiMove(_EndPosition, _TargetCharacter1, _TargetItem1)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -536,8 +604,9 @@ ACTIONS
 			CharacterLookAt(_TargetPos1)
 		ENDIF
 
-		IF "!c1"
+		IF "!c1&!c2"
 			CharacterHasStatus(__Me, INVISIBLE)
+			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
 			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
 		ENDIF
@@ -632,8 +701,9 @@ ACTIONS
 	THEN
 		Sleep(0.5)
 		CharacterLookAt(_TargetPos)
-		IF "!c1"
+		IF "!c1&!c2"
 			CharacterHasStatus(__Me, INVISIBLE)
+			HasFlag(__Me, "LeaderLib_Behavior_IsInvisible")
 		THEN
 			CharacterPlayEffect(__Me, "RS3_FX_UI_Icon_SkipTurn_01", "Dummy_OverheadFX")
 		ENDIF
@@ -660,13 +730,13 @@ ACTIONS
 
 REACTION Combat_MoveOutOfSurfaces, 5
 USAGE COMBAT
-CHECK "(c1|c2)&!c3&!c4&c5&!c6"
-	IsInSurface(__Me,SurfaceOil)
-	IsInDangerousSurface(__Me)		
-	CharacterIsFloating(__Me)
-	CharacterHasStatus(__Me,ETHEREAL_SOLES)
-	CharacterCanMove(__Me)
-	HasFlag(__Me, "LeaderLib_Behavior_MoveOutOfSurfacesDisabled")
+CHECK "(c1|c2)&!c3&!c4&!c5&c6"
+	IsInSurface(__Me,SurfaceOil) //c1
+	IsInDangerousSurface(__Me)	//c2
+	CharacterIsFloating(__Me) //!c3
+	CharacterHasStatus(__Me,ETHEREAL_SOLES) //!c4
+	HasFlag(__Me, "LeaderLib_Behavior_IsFloating") //!c5
+	CharacterCanMove(__Me) //c6
 ACTIONS
 	CallFunction("StopEvaluateScore")
 	IF "c1"
@@ -722,3 +792,20 @@ ACTIONS
 INTERRUPT
 ACTIONS
 	Set(%DialogLookAtChar,null)
+
+//New
+
+EVENTS
+
+EVENT LeaderLib_DefaultCharacter_DisableMoveOutOfSurfaces
+ON
+	OnCharacterFlagSet("LeaderLib_Behavior_MoveOutOfSurfacesDisabled", __Me)
+ACTIONS
+	Interrupt("Combat_MoveOutOfSurfaces")
+	SetPriority("Combat_MoveOutOfSurfaces", 0)
+	
+EVENT LeaderLib_DefaultCharacter_EnableMoveOutOfSurfaces
+ON
+	OnCharacterFlagCleared("LeaderLib_Behavior_MoveOutOfSurfacesDisabled", __Me)
+ACTIONS
+	SetPriority("Combat_MoveOutOfSurfaces", 5)
